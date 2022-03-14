@@ -97,12 +97,21 @@
 
     // d)
     $dashboard = new Dashboard();
-    $dashboard->__set('dataInicio', '2018-08-01');
-    $dashboard->__set('dataFim', '2018-08-31');
-
+    
     $conexao = new Conexao();
+    
+    //c)
+    $competencia = explode('-', $_GET['competencia']);
+    $ano = $competencia[0];
+    $mes = $competencia[1];
+    // Função do PHP que permite saber quando dias o mês tem
+    $diasDoMes = cal_days_in_month(CAL_GREGORIAN, $mes, $ano);
+    $dashboard->__set('dataInicio', $ano.'-'.$mes.'-01');
+    $dashboard->__set('dataFim', $ano.'-'.$mes.'-'.$diasDoMes);
+
     $bd = new Bd($conexao, $dashboard);
     $dashboard->__set('numeroVendas', $bd->getNumeroVendas());
     $dashboard->__set('totalVendas', $bd->getTotalVendas());
-    print_r($dashboard);
+     // d)
+    echo json_encode($dashboard);
 ?>
