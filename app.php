@@ -14,6 +14,14 @@
         public $dataFim;
         public $numeroVendas;
         public $totalVendas;
+        public $totalDepesas;
+        public $clientesAtivos;
+        public $ativo = true;
+        public $clientesInativos;
+        public $inativo = false;
+        public $criticas = 1;
+        public $sugestoes = 2;
+        public $elogios = 3;
 
         public function __get($atributo){
             return $this->$atributo;
@@ -93,6 +101,95 @@
 
             return $stmt->fetch(PDO::FETCH_OBJ)->total_vendas;
         }
+
+        public function getTotalDespesas(){
+            $query = '
+                select
+                    SUM(total) as total_despesas
+                from
+                    tb_despesas
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_OBJ)->total_despesas;
+        }
+
+
+        public function getClientesAtivos(){
+            $query = '
+                select 
+                    count(*) as clientes_ativos 
+                from 
+                    tb_clientes 
+                where 
+                cliente_ativo = :ativo;
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindValue(':ativo', $this->dashboard->__get('ativo'));
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ)->clientes_ativos;
+        }
+
+        public function getClientesInativos(){
+            $query = '
+                select 
+                    count(*) as clientes_inativos 
+                from 
+                    tb_clientes 
+                where 
+                    cliente_ativo = :inativo;
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindValue(':inativo', $this->dashboard->__get('inativo'));
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ)->clientes_inativos;
+        }
+
+        public function getCriticas(){
+            $query = '
+                select 
+                    count(*) as total_criticas
+                from
+                    tb_contatos
+                where
+                    tipo_contato = :criticas;
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindValue(':criticas', $this->dashboard->__get('criticas'));
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ)->total_criticas;
+        }
+
+        public function getElogios(){
+            $query = '
+                select 
+                    count(*) as total_elogios
+                from
+                    tb_contatos
+                where
+                    tipo_contato = :elogios;
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindValue(':elogios', $this->dashboard->__get('elogios'));
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ)->total_elogios;
+        }
+
+        public function getSugestoes(){
+            $query = '
+                select 
+                    count(*) as total_sugestoes
+                from
+                    tb_contatos
+                where
+                    tipo_contato = :sugestoes;
+            ';
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindValue(':sugestoes', $this->dashboard->__get('sugestoes'));
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ)->total_sugestoes;
+        }
     }
 
     // d)
@@ -112,6 +209,12 @@
     $bd = new Bd($conexao, $dashboard);
     $dashboard->__set('numeroVendas', $bd->getNumeroVendas());
     $dashboard->__set('totalVendas', $bd->getTotalVendas());
+    $dashboard->__set('clientesAtivos', $bd->getClientesAtivos());
+    $dashboard->__set('clientesInativos', $bd->getClientesInativos());
+    $dashboard->__set('criticas', $bd->getCriticas());
+    $dashboard->__set('elogios', $bd->getElogios());
+    $dashboard->__set('sugestoes', $bd->getSugestoes());
+    $dashboard->__set('totalDepesas', $bd->getTotalDespesas());
      // d)
     echo json_encode($dashboard);
 ?>
